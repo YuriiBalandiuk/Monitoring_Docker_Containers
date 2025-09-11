@@ -3,7 +3,7 @@ services:
 
   my-app:
     image: containers-monitoring-app
-    container_name: my-python-container
+    container_name: main-runner
     restart: always
     environment:
       - DOCKER_HOST=tcp://host.docker.internal:2375
@@ -16,7 +16,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - D:/ContainerMonitoringProgram/container-monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - D:/own_projects/Containers-monitoring-application/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     restart: always
@@ -48,7 +48,7 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
     env_file:
-      - D:/ContainerMonitoringProgram/container-monitoring/.env
+      - D:/own_projects/Containers-monitoring-application/.env
     restart: always
 
 volumes:

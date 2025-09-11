@@ -1,3 +1,6 @@
 docker
 pyTelegramBotAPI
 python-dotenv
+black
+pylint
+flake8
