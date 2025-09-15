@@ -4,3 +4,4 @@ python-dotenv
 black
 pylint
 flake8
+pytest

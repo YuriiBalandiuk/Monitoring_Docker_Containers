@@ -13,6 +13,7 @@ if __name__ == "__main__":
 try:
     client = docker.from_env()
 except errors.DockerException:
+    client = None
     lc.logger.error("Docker is not working right now!")
 
 
