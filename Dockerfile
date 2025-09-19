@@ -9,11 +9,3 @@ COPY requirements.txt /ubuntu-folder/app/
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /ubuntu-folder/app/
 CMD ["python", "main.py"]
-
-
-
-
-
-
-
-

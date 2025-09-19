@@ -12,18 +12,15 @@ try:
     from monitoring.setup_monitoring import get_container_status_real_time as gcs
 except FileNotFoundError as excerr:
     lc.logger.error("Docker isn't working now!\n" + str(excerr))
-    print("Docker isn't working now!")
 
 if __name__ == "__main__":
-    lc.logger.error("This file cannot be run as main!")
-    print("\nThis file cannot be run as main!")
+    lc.logger.error("This file can't be run as main!")
     sys.exit()
 
 try:
     load_dotenv()
 except NameError as nerr:
     lc.logger.error("Unable to load the environment!\n" + str(nerr))
-    print("Unable to load the environment!")
 
 try:
     API_TOKEN = os.getenv("API_TOKEN")
@@ -32,7 +29,6 @@ try:
     bot = telebot.TeleBot(API_TOKEN)
 except ValueError as verr:
     lc.logger.error("The API-TOKEN hasn't been found!\n" + str(verr))
-    print("The API-TOKEN hasn't been found!")
 
 
 def main_keyboard() -> ReplyKeyboardMarkup:
@@ -60,7 +56,7 @@ def send_start(message) -> None:
     Args:
         message: Telegram message object containing chat and user info.
     """
-    bot.send_message(message.chat.id, "Hi! I\'m a Docker container monitoring bot",
+    bot.send_message(message.chat.id, "Hi! I'm a Docker container monitoring bot 🤖",
         reply_markup=main_keyboard())
 
 
@@ -83,8 +79,10 @@ def send_help(message) -> None:
     Args:
         message: Telegram message object.
     """
-    bot.send_message(message.chat.id, "Help information: Use Status to "
-        "get container stats, Clear to clear chat.", reply_markup=main_keyboard())
+    bot.send_message(message.chat.id, 
+        "🔍 Help information:\n"
+        "\n1️⃣ Use the 'Status' button to get the container's stats"
+        "\n2️⃣ Use the 'Clear' button to clear chat", reply_markup=main_keyboard())
 
 
 @bot.message_handler(commands=['help'])
@@ -115,12 +113,12 @@ def sen_containers_stats(message) -> None:
             count += 1
             if count == 5:
                 bot.send_message(message.chat.id,
-                                 "You have received five information containers", 
+                                 "You've received five information containers! ✅", 
                                  reply_markup=main_keyboard())
                 break
         except Exception as err:
-            lc.logger.error("The docker containers is not running now!\n" + str(err))
-            bot.reply_to(message, "The docker containers is not running now!")
+            lc.logger.error("The docker containers isn't running now!\n" + str(err))
+            bot.reply_to(message, "The docker containers isn't running now! 🚨")
             break
 
 
@@ -152,7 +150,7 @@ def clear_chat(message) -> None:
             time.sleep(0.2)
         except Exception as exc:
             pass
-    bot.send_message(message.chat.id, "The chat has been cleared!", reply_markup=main_keyboard())
+    bot.send_message(message.chat.id, "The chat's been cleared! ✅", reply_markup=main_keyboard())
 
 
 @bot.message_handler(commands=['clear'])
@@ -211,5 +209,5 @@ def start_telegram_bot() -> None:
     try:
         bot.infinity_polling(none_stop=True, timeout=60)
     except Exception as exc:
-        lc.logger.error("The telegram bot is not running now!" + str(exc))
+        lc.logger.error("The telegram bot isn't running now!" + str(exc))
         time.sleep(15)

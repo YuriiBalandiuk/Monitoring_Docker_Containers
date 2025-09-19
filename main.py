@@ -22,4 +22,4 @@ def main() -> int:
 if __name__ == "__main__":
     END = main()
     if END == 0:
-        lc.logger.info("The app is complete!")
+        lc.logger.info("The app is completed!")

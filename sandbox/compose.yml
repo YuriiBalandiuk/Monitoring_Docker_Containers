@@ -1,9 +1,9 @@
 version: '3'
 services:
 
-  backend-dev:
-    image: main-runner:latest
-    container_name: monitoring-solution
+  my-app:
+    image: main-runner
+    container_name: container-monitoring-app
     restart: always
     environment:
       - DOCKER_HOST=tcp://host.docker.internal:2375
@@ -16,7 +16,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - D:/Own_Projects/Containers-monitoring-application/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - D:/own_projects/Containers-monitoring-application/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     restart: always
@@ -28,10 +28,14 @@ services:
     container_name: cadvisor
     ports:
       - "8080:8080"
+    #volumes:
+    #  - //var/run/docker.sock:/var/run/docker.sock:ro
     volumes:
+    #  - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    #  - /dev/disk/:/dev/disk:ro
     restart: always
     depends_on:
       - grafana
@@ -44,7 +48,7 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
     env_file:
-      - D:/Own_Projects/Containers-monitoring-application/.env
+      - D:/own_projects/Containers-monitoring-application/.env
     restart: always
 
 volumes:
