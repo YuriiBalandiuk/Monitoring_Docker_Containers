@@ -106,14 +106,14 @@ def sen_containers_stats(message) -> None:
     """
     count = 0
 
-    for number in range(5):
+    for number in range(3):
         try:
             container_stats_text = "\n".join(gcm())
             bot.reply_to(message, container_stats_text)
             count += 1
-            if count == 5:
+            if count == 3:
                 bot.send_message(message.chat.id,
-                                 "You've received five information containers! ✅", 
+                                 "Three containers of information delivered! ✅", 
                                  reply_markup=main_keyboard())
                 break
         except Exception as err:

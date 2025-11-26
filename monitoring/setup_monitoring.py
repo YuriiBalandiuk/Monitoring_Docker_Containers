@@ -35,20 +35,73 @@ def get_container_metrics() -> list[str]:
     """
     containers = client.containers.list()
     containers_stats = []
+    
+    total_cpu = 0.0
+    total_mem = 0.0
+    total_mem_limit = 0.0
+    total_blk_read = 0
+    total_blk_write = 0
+    total_rx = 0.0
+    total_tx = 0.0
+    total_restarts = 0
+
     for container in containers:
         stats = container.stats(stream=False)
 
         cpu_percent = calculate_cpu_percent(stats)
         image = container.image.tags[0] if container.image.tags else "N/A"
         created = container.attrs['Created']
-        # ports = container.attrs['NetworkSettings']['Ports']
-        mem_usage_mb = stats["memory_stats"]["usage"] / (1024 * 1024)
-        containers_stats.append(f"~  Container name: {container.name} \n"
-                                f"~  Container status: {container.status} \n"
-                                f"~  Parent image: {image} \n"
-                                f"~  Time created: {created} \n"
-                                f"~  CPU load: {cpu_percent:.2f} % \n"
-                                f"~  RAM use: {mem_usage_mb:.2f} MB\n")
+        mem_usage = stats["memory_stats"]["usage"] - stats["memory_stats"]["stats"].get("cache", 0)
+        mem_usage_mb = mem_usage / (1024 * 1024)
+        
+        mem_limit_mb = stats["memory_stats"]["limit"] / (1024 * 1024)
+        mem_percent = (mem_usage / stats["memory_stats"]["limit"]) * 100 if stats["memory_stats"]["limit"] > 0 else 0
+
+        blk_read, blk_write = 0, 0
+        if stats["blkio_stats"]["io_service_bytes_recursive"]:
+            blk_read = stats["blkio_stats"]["io_service_bytes_recursive"][0]["value"]
+            if len(stats["blkio_stats"]["io_service_bytes_recursive"]) > 1:
+                blk_write = stats["blkio_stats"]["io_service_bytes_recursive"][1]["value"]
+
+        rx_bytes, tx_bytes = 0, 0
+        if "networks" in stats:
+            rx_bytes = round(sum(net["rx_bytes"] for net in stats["networks"].values()) / 1024, 2)
+            tx_bytes = round(sum(net["tx_bytes"] for net in stats["networks"].values()) / 1024, 2)
+
+        restart_count = container.attrs.get("RestartCount", 0)
+
+        containers_stats.append(
+            f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+            f"~  Container name: {container.name}\n"
+            f"~  Container status: {container.status}\n"
+            f"~  Parent image: {image}\n"
+            f"~  Time created: {created}\n"
+            f"~  CPU load: {cpu_percent:.2f}%\n"
+            f"~  RAM use: {mem_usage_mb:.2f} MB / {mem_limit_mb:.2f} MB ({mem_percent:.2f}%)\n"
+            f"~  Disk IO: Read {blk_read} B / Write {blk_write} B\n"
+            f"~  Network IO: RX {rx_bytes} KB / TX {tx_bytes} KB\n"
+            f"~  Restart count: {restart_count}\n"
+        )
+        
+        total_cpu += cpu_percent
+        total_mem += mem_usage_mb
+        total_mem_limit += mem_limit_mb
+        total_blk_read += blk_read
+        total_blk_write += blk_write
+        total_rx += rx_bytes
+        total_tx += tx_bytes
+        total_restarts += restart_count
+    
+    containers_stats.append(
+        f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        f"           TOTAL METRICS FOR ALL CONTAINERS         \n\n"
+        f"~  CPU load (sum): {total_cpu:.2f}%\n"
+        f"~  RAM use (sum): {total_mem:.2f} MB / {total_mem_limit:.2f} MB\n"
+        f"~  Disk IO (sum): Read {total_blk_read} B / Write {total_blk_write} B\n"
+        f"~  Network IO (sum): RX {total_rx:.2f} KB / TX {total_tx:.2f} KB\n"
+        f"~  Restarts (sum): {total_restarts}\n"
+    )   
+    
     return containers_stats
 
 
